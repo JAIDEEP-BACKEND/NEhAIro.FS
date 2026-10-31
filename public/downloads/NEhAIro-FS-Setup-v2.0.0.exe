@@ -1,0 +1,23 @@
+@echo off
+title NEhAIro.FS // Cyber Autonomous Workstation
+echo ========================================================
+echo  NEhAIro.FS // CYBER AUTONOMOUS FILESYSTEM WORKSTATION
+echo  Dive into the world of Remote Automation
+echo ========================================================
+echo.
+echo Checking Node.js installation...
+where node >nul 2>nul
+if %ERRORLEVEL% neq 0 (
+    echo [ERROR] Node.js is not installed or not in PATH!
+    echo Please install Node.js v20+ from https://nodejs.org
+    pause
+    exit /b 1
+)
+echo [OK] Node.js detected.
+echo.
+echo Starting NEhAIro.FS Workstation on http://localhost:3001...
+start http://localhost:3001
+echo.
+echo Launching server core...
+node server/server.js
+pause

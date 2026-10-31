@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NEhAIro.FS — Autonomous Filesystem & Workstation</title>
+  <link rel="icon" type="image/png" href="/logo.png" onerror="this.href='./public/logo.png'">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&family=Space+Grotesk:wght@500;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #ffffff;
+      --fg: #000000;
+      --green: #16a34a;
+      --green-neon: #00ff88;
+      --green-dark: #15803d;
+      --green-soft: #f0fdf4;
+      --gray-light: #f8fafc;
+      --gray-border: #000000;
+      --font-mono: 'JetBrains Mono', monospace;
+      --font-sans: 'Space Grotesk', system-ui, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--fg);
+      font-family: var(--font-sans);
+      line-height: 1.5;
+      overflow-x: hidden;
+      border-top: 6px solid var(--fg);
+    }
+
+    /* Typography & Utilities */
+    .mono { font-family: var(--font-mono); }
+    .cap { color: var(--green); font-weight: 900; }
+    .small { color: #000000; font-weight: 900; }
+    
+    .border-black { border: 3px solid #000000; }
+    .shadow-black { box-shadow: 6px 6px 0px #000000; }
+    .shadow-green { box-shadow: 6px 6px 0px var(--green); }
+    .shadow-black-lg { box-shadow: 10px 10px 0px #000000; }
+
+    /* Header */
+    header.top-nav {
+      background: #ffffff;
+      border-bottom: 3px solid var(--fg);
+      padding: 16px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--fg);
+    }
+    .brand-logo-small {
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
+    }
+    .brand-title-small {
+      font-family: var(--font-mono);
+      font-size: 20px;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+    }
+    .nav-items {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .nav-link {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 700;
+      color: #000000;
+      text-decoration: none;
+      padding: 6px 12px;
+      transition: background 0.15s ease;
+    }
+    .nav-link:hover {
+      background: var(--green);
+      color: #ffffff;
+    }
+
+    /* Brutalist Buttons */
+    .btn-brutal {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: #000000;
+      color: #ffffff;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 800;
+      padding: 12px 24px;
+      text-decoration: none;
+      border: 3px solid #000000;
+      box-shadow: 5px 5px 0px #000000;
+      cursor: pointer;
+      transition: all 0.12s ease;
+      user-select: none;
+    }
+    .btn-brutal:hover {
+      transform: translate(-3px, -3px);
+      box-shadow: 8px 8px 0px var(--green);
+      background: var(--green);
+      color: #000000;
+    }
+    .btn-brutal:active {
+      transform: translate(2px, 2px);
+      box-shadow: 1px 1px 0px #000000;
+    }
+    .btn-brutal-white {
+      background: #ffffff;
+      color: #000000;
+      border: 3px solid #000000;
+      box-shadow: 5px 5px 0px #000000;
+    }
+    .btn-brutal-white:hover {
+      background: #000000;
+      color: #ffffff;
+      box-shadow: 8px 8px 0px var(--green);
+    }
+
+    /* Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+      position: relative;
+    }
+
+    /* Hero Section with Animation Lockup */
+    .hero-section {
+      min-height: 82vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 70px 0 50px 0;
+      position: relative;
+      overflow: hidden;
+      border-bottom: 3px solid #000000;
+    }
+
+    /* Parallax Floating Watermark */
+    .parallax-watermark {
+      position: absolute;
+      top: 15%;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: clamp(80px, 16vw, 220px);
+      font-weight: 900;
+      color: rgba(0, 0, 0, 0.03);
+      user-select: none;
+      pointer-events: none;
+      white-space: nowrap;
+      font-family: var(--font-mono);
+      z-index: 0;
+    }
+
+    /* Parallax Floating Badges */
+    .floating-badge {
+      position: absolute;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 800;
+      padding: 6px 14px;
+      border: 2px solid #000000;
+      background: #ffffff;
+      box-shadow: 4px 4px 0px #000000;
+      z-index: 2;
+      pointer-events: none;
+      transition: transform 0.1s linear;
+    }
+    .badge-1 { top: 12%; left: 8%; transform: rotate(-3deg); }
+    .badge-2 { top: 22%; right: 10%; transform: rotate(4deg); background: var(--green-soft); border-color: var(--green); color: var(--green-dark); }
+    .badge-3 { bottom: 15%; left: 12%; transform: rotate(2deg); }
+    .badge-4 { bottom: 20%; right: 14%; transform: rotate(-4deg); }
+
+    @media (max-width: 768px) {
+      .floating-badge { display: none; }
+    }
+
+    /* The Center Animation Lockup */
+    .intro-lockup-container {
+      position: relative;
+      z-index: 5;
+      margin-bottom: 30px;
+    }
+
+    .intro-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .intro-logo {
+      width: 84px;
+      height: 84px;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform: scale(0.2);
+      opacity: 0;
+      transition: transform 0.65s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease;
+      cursor: pointer;
+    }
+    .intro-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .intro-text-wrapper {
+      max-width: 0px;
+      opacity: 0;
+      overflow: hidden;
+      white-space: nowrap;
+      margin-left: 0px;
+      display: flex;
+      align-items: center;
+      transition: max-width 0.65s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.45s ease, margin-left 0.5s ease;
+    }
+
+    .intro-text-wrapper.revealed {
+      max-width: 520px;
+      opacity: 1;
+      margin-left: 18px;
+    }
+
+    .intro-letters {
+      font-family: var(--font-mono);
+      font-size: clamp(38px, 6.5vw, 76px);
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      display: flex;
+      align-items: center;
+      user-select: none;
+    }
+
+    .intro-tagline {
+      font-family: var(--font-mono);
+      font-size: clamp(15px, 2.2vw, 20px);
+      font-weight: 600;
+      color: #334155;
+      margin-top: 20px;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .intro-tagline.revealed {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Hero Subtitle & CTA */
+    .hero-content {
+      position: relative;
+      z-index: 5;
+      max-width: 720px;
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    .hero-content.revealed {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .hero-lead {
+      font-size: 18px;
+      color: #1e293b;
+      margin-bottom: 30px;
+      font-weight: 500;
+    }
+    .hero-buttons {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    /* Parallax Features Section */
+    .section {
+      padding: 100px 0;
+      border-bottom: 3px solid #000000;
+      position: relative;
+    }
+    .section-header {
+      margin-bottom: 60px;
+      text-align: left;
+    }
+    .section-title {
+      font-size: clamp(32px, 4.5vw, 48px);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      text-transform: uppercase;
+      line-height: 1.1;
+    }
+    .section-sub {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: #64748b;
+      margin-top: 8px;
+    }
+
+    /* Parallax Grid */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 36px;
+    }
+    @media (max-width: 820px) {
+      .features-grid { grid-template-columns: 1fr; }
+    }
+
+    .feature-card {
+      background: #ffffff;
+      border: 3px solid #000000;
+      box-shadow: 8px 8px 0px #000000;
+      padding: 36px;
+      position: relative;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .feature-card:hover {
+      transform: translate(-4px, -4px);
+      box-shadow: 12px 12px 0px var(--green);
+    }
+    .card-num {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 900;
+      background: #000000;
+      color: #ffffff;
+      padding: 3px 8px;
+      display: inline-block;
+      margin-bottom: 16px;
+    }
+    .card-title {
+      font-size: 24px;
+      font-weight: 900;
+      margin-bottom: 12px;
+      letter-spacing: -0.02em;
+    }
+    .card-desc {
+      font-size: 15px;
+      color: #475569;
+      line-height: 1.6;
+    }
+
+    /* Download Section */
+    .download-section {
+      background: #f8fafc;
+      padding: 100px 0;
+      border-bottom: 3px solid #000000;
+    }
+    .download-card {
+      background: #ffffff;
+      border: 4px solid #000000;
+      box-shadow: 12px 12px 0px var(--green);
+      padding: 50px;
+      text-align: center;
+      max-width: 840px;
+      margin: 0 auto;
+    }
+    .dl-title {
+      font-size: clamp(32px, 5vw, 46px);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .dl-sub {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: #64748b;
+      margin-bottom: 36px;
+    }
+    .dl-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 30px;
+    }
+    .dl-meta {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: #64748b;
+      border-top: 2px dashed #000000;
+      padding-top: 20px;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    /* Footer */
+    footer.site-footer {
+      background: #000000;
+      color: #ffffff;
+      padding: 50px 0;
+      font-family: var(--font-mono);
+    }
+    .footer-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .footer-tagline {
+      font-size: 13px;
+      color: #94a3b8;
+    }
+
+    /* Toast */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--green);
+      color: #000000;
+      border: 3px solid #000000;
+      box-shadow: 4px 4px 0px #000000;
+      padding: 10px 18px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 800;
+      z-index: 1000;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="toast">COPIED TO CLIPBOARD</div>
+
+  <!-- Header -->
+  <header class="top-nav">
+    <a href="#" class="brand-wrap">
+      <img src="/logo.png" onerror="this.src='./public/logo.png'; if(!this.src) this.src='./dist/logo.png';" class="brand-logo-small" alt="NEhAIro Logo">
+      <span class="brand-title-small">
+        <span class="cap">N</span><span class="cap">E</span><span class="small">h</span><span class="cap">A</span><span class="cap">I</span><span class="small">r</span><span class="small">o</span><span class="small">.</span><span class="cap">F</span><span class="cap">S</span>
+      </span>
+    </a>
+
+    <nav class="nav-items">
+      <a href="#features" class="nav-link">Features</a>
+      <a href="#download" class="nav-link">Download</a>
+      <a href="https://github.com/nehairo/nehairo-fs" target="_blank" rel="noopener" class="btn-brutal btn-brutal-white" style="padding: 10px 18px; font-size: 12px;">
+        <span>GitHub Repo ↗</span>
+      </a>
+      <a href="http://localhost:3001" target="_blank" class="btn-brutal" style="padding: 10px 18px; font-size: 12px;">
+        <span>Launch App ↗</span>
+      </a>
+    </nav>
+  </header>
+
+  <!-- Hero with Intro Animation & Parallax Layers -->
+  <section class="hero-section" id="hero">
+    
+    <!-- Parallax Floating Elements -->
+    <div class="parallax-watermark" data-speed="0.25">NEhAIro</div>
+    <div class="floating-badge badge-1" data-speed="-0.35">Direct Root Access</div>
+    <div class="floating-badge badge-2" data-speed="0.4">Offline First</div>
+    <div class="floating-badge badge-3" data-speed="-0.2">v2.0.0 Release</div>
+    <div class="floating-badge badge-4" data-speed="0.3">Local AI</div>
+
+    <div class="container">
+      
+      <!-- The Animation Lockup -->
+      <div class="intro-lockup-container">
+        <div class="intro-row">
+          <!-- Logo: pops center, slides left -->
+          <div class="intro-logo" id="heroLogo" onclick="playAnimation()">
+            <img src="/logo.png" onerror="this.src='./public/logo.png'; if(!this.src) this.src='./dist/logo.png';" alt="NEhAIro Logo">
+          </div>
+
+          <!-- Text: unrolls to the right in a straight line -->
+          <div class="intro-text-wrapper" id="heroText">
+            <div class="intro-letters">
+              <span class="cap">N</span>
+              <span class="cap">E</span>
+              <span class="small">h</span>
+              <span class="cap">A</span>
+              <span class="cap">I</span>
+              <span class="small">r</span>
+              <span class="small">o</span>
+              <span class="small">.</span>
+              <span class="cap">F</span>
+              <span class="cap">S</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tagline: reveals smoothly underneath -->
+        <div class="intro-tagline" id="heroTagline">
+          Dive into the world of Remote Automation
+        </div>
+      </div>
+
+      <!-- Hero Lead & CTAs -->
+      <div class="hero-content" id="heroContent">
+        <p class="hero-lead">
+          The unjailed host filesystem explorer and autonomous repository workstation.
+        </p>
+
+        <div class="hero-buttons">
+          <a href="/downloads/NEhAIro-FS-v2.0.0-win-x64.zip" download="NEhAIro-FS-v2.0.0.zip" class="btn-brutal" style="font-size: 14px; padding: 14px 28px;">
+            <span>Download (.zip)</span>
+          </a>
+          <a href="http://localhost:3001" target="_blank" class="btn-brutal btn-brutal-white" style="font-size: 14px; padding: 14px 24px;">
+            <span>Open Web HUD</span>
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Parallax Core Features -->
+  <section class="section" id="features">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Core Subsystems</h2>
+        <p class="section-sub">Short, precise host capabilities without artificial boundaries.</p>
+      </div>
+
+      <div class="features-grid">
+        
+        <!-- Card 1 (Parallax shifted) -->
+        <div class="feature-card" data-speed="0.08">
+          <span class="card-num">01</span>
+          <h3 class="card-title">Root Host Filesystem</h3>
+          <p class="card-desc">
+            Direct read and write across your physical drives without sandbox restrictions. Move, edit, batch upload, and scaffold folders directly on the host machine.
+          </p>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="feature-card" data-speed="-0.08">
+          <span class="card-num">02</span>
+          <h3 class="card-title">Format Management Hub</h3>
+          <p class="card-desc">
+            Recursively scans target folders like <code>Documents</code> to categorize Presentations (<code>.pptx</code>), PDFs, Spreadsheets, and Code. 1-click Auto-Organize cleans scattered files instantly.
+          </p>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="feature-card" data-speed="0.12">
+          <span class="card-num">03</span>
+          <h3 class="card-title">Local Ollama Intelligence</h3>
+          <p class="card-desc">
+            Private on-device semantic file search powered by your local GPU (<code>qwen2.5:1.5b</code>). Zero cloud dependencies, zero external data leakage.
+          </p>
+        </div>
+
+        <!-- Card 4 -->
+        <div class="feature-card" data-speed="-0.12">
+          <span class="card-num">04</span>
+          <h3 class="card-title">Dual Shells &amp; Git Automation</h3>
+          <p class="card-desc">
+            Automates the full Git repository lifecycle from branch creation to semantic commits. Paired with a live PowerShell terminal and real-time host CPU and RAM telemetry.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Download Center -->
+  <section class="download-section" id="download">
+    <div class="container">
+      <div class="download-card" data-speed="0.05">
+        <h2 class="dl-title">Download NEhAIro.FS</h2>
+        <p class="dl-sub">Version 2.0.0 Release</p>
+
+        <div class="dl-buttons">
+          <a href="/downloads/NEhAIro-FS-v2.0.0-win-x64.zip" download="NEhAIro-FS-v2.0.0.zip" class="btn-brutal" style="font-size: 15px; padding: 16px 36px;">
+            <span>Download (.zip)</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Minimal Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-row">
+        <div>
+          <span class="mono" style="font-size: 16px; font-weight: 900;">
+            <span class="cap">N</span><span class="cap">E</span><span class="small" style="color: #ffffff;">h</span><span class="cap">A</span><span class="cap">I</span><span class="small" style="color: #ffffff;">r</span><span class="small" style="color: #ffffff;">o</span><span class="small" style="color: #ffffff;">.</span><span class="cap">F</span><span class="cap">S</span>
+          </span>
+        </div>
+
+        <div class="footer-tagline">
+          Dive into the world of Remote Automation
+        </div>
+
+        <div style="font-size: 12px; display: flex; gap: 16px; align-items: center;">
+          <a href="https://github.com/nehairo/nehairo-fs" target="_blank" rel="noopener" style="color: #ffffff; text-decoration: none;" class="mono">[GitHub Repo ↗]</a>
+          <span style="color: #64748b;">&copy; 2026 NEhAIro.FS</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Script for Intro Animation & Parallax Scroll -->
+  <script>
+    function playAnimation() {
+      const logo = document.getElementById('heroLogo');
+      const text = document.getElementById('heroText');
+      const tagline = document.getElementById('heroTagline');
+      const content = document.getElementById('heroContent');
+
+      logo.style.transform = 'scale(0.2)';
+      logo.style.opacity = '0';
+      text.classList.remove('revealed');
+      tagline.classList.remove('revealed');
+      content.classList.remove('revealed');
+
+      setTimeout(() => {
+        logo.style.transform = 'scale(1)';
+        logo.style.opacity = '1';
+      }, 100);
+
+      setTimeout(() => {
+        text.classList.add('revealed');
+      }, 750);
+
+      setTimeout(() => {
+        tagline.classList.add('revealed');
+      }, 1450);
+
+      setTimeout(() => {
+        content.classList.add('revealed');
+      }, 1900);
+    }
+
+    let ticking = false;
+    function updateParallax() {
+      const scrollY = window.pageYOffset;
+
+      document.querySelectorAll('[data-speed]').forEach(el => {
+        const speed = parseFloat(el.getAttribute('data-speed')) || 0;
+        const yPos = scrollY * speed;
+        el.style.transform = `translate3d(0, ${yPos}px, 0)`;
+      });
+
+      ticking = false;
+    }
+
+    window.addEventListener('scroll', () => {
+      if (!ticking) {
+        requestAnimationFrame(updateParallax);
+        ticking = true;
+      }
+    });
+
+    function copyText(val) {
+      navigator.clipboard.writeText(val);
+      const toast = document.getElementById('toast');
+      toast.style.display = 'block';
+      setTimeout(() => {
+        toast.style.display = 'none';
+      }, 1800);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      playAnimation();
+    });
+  </script>
+</body>
+</html>
